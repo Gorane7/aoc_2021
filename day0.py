@@ -1,20 +1,21 @@
 from main import *
 
 
-def solve1(data):
-    dat = data["data"]
+def solve1(dat):
+    data = dat["data"]
 
 
-def solve2(data):
-    dat = data["data"]
+def solve2(dat):
+    data = dat["data"]
 
 
 def main():
+    day = 0
     basic = [("...", "{string}")]
     ints = [("...", "{int}")]
     input_format = basic
-    data = parse_input(1, input_format)
-    if data:
+    data = parse_input(day, input_format)
+    if data["data"]:
         print("Got data successfully")
     else:
         print("Error getting data")

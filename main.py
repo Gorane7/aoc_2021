@@ -1,7 +1,8 @@
 import requests
+import os
 
 # CONSTANTS
-YEAR = 2020
+YEAR = 2021
 
 
 def parse_lines(lines, input_format):
@@ -39,6 +40,14 @@ def parse_line(line, parser):
             return int(line)
         if elements[0] == "string":
             return line
+    elif len(set(splits)) == 1:
+        split = line.split(splits[0])
+        for i in range(len(split)):
+            if elements[i] == "int":
+                split[i] = int(split[i])
+            elif elements[i] == "string":
+                split[i] = split[i]
+        return split
     print("Problem, can't parse line with splits yet")
     exit()
 
@@ -52,9 +61,10 @@ def save_input(day, lines):
 def get_input(year, day):
     url = f"https://adventofcode.com/{year}/day/{day}/input"
     cookies = {
-        "_ga": "GA1.2.14223148.1638045100",
-        "session": "53616c7465645f5f4802c58532988d34dac42590f2556e11734e96b0c39f9e5c65438a7be2ad722c82f4333ee1db3078",
-        "_gid": "GA1.2.1672151336.1638134874"
+        "_gat": "1",
+        "_ga": "GA1.2.1668813612.1666544999",
+        "session": "53616c7465645f5fff1738b41a2cf505ad51e2834adf62d5668670228021b7efc1ed1bdc20474202dc3178ca00223ce1356e368946e5665d0a4c93a834e6074e",
+        "_gid": "GA1.2.743798007.1666544999"
     }
     ans = requests.get(url, cookies=cookies)
     print(ans.status_code)
@@ -64,9 +74,11 @@ def get_input(year, day):
 
 
 def parse_input(day, input_format):
-    file = open(f"inputs/in{day}.txt", "r")
-    lines = [x.strip("\n") for x in file.readlines()]
-    file.close()
+    lines = []
+    if os.path.exists(f"inputs/in{day}.txt"):
+        file = open(f"inputs/in{day}.txt", "r")
+        lines = [x.strip("\n") for x in file.readlines()]
+        file.close()
     if len(lines) == 0:
         lines = get_input(YEAR, day)
         save_input(day, lines)
