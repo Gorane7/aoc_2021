@@ -26,7 +26,7 @@ def solve1(dat):
     decoder = data[0]
     data = data[1:]
     background = "."
-    for i in range(50):
+    for i in range(2):
         data, background = enhance(data, decoder, background)
     for row in data:
         pass
@@ -41,6 +41,20 @@ def solve1(dat):
 
 def solve2(dat):
     data = dat["data"]
+    decoder = data[0]
+    data = data[1:]
+    background = "."
+    for i in range(50):
+        data, background = enhance(data, decoder, background)
+    for row in data:
+        pass
+        # print(row)
+    # print(len(data))
+    # print(len(data[0]))
+    amount = 0
+    for row in data:
+        amount += row.count("#")
+    return amount
 
 
 def main():

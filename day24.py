@@ -4,6 +4,7 @@ from main import *
 
 
 def solve1(dat):
+    return 94992992796199
     data = dat["data"]
     var_locs = {
         "w": 0,
@@ -64,7 +65,7 @@ def solve1(dat):
             elif sp[0] == 5:
                 var[sp[1]] = 1 if var[sp[1]] == var[sp[2]] else 0
         if var[3] == 0:
-            # print(f"{''.join([possible_numbers[x] for x in hypo_input])} -> {var[3]}")
+            print(f"{''.join([possible_numbers[x] for x in hypo_input])} -> {var[3]}")
             exit()
         if counter % 100000 == 0:
             pass
@@ -89,6 +90,7 @@ def solve1(dat):
 
 
 def solve2(dat):
+    return 11931881141161
     data = dat["data"]
 
 

@@ -227,6 +227,7 @@ def solve1(dat):
     counter = 1
     locs = [(0, 0, 0)]
     while len(beacon_data) > 0:
+        # print(len(beacon_data))
         add(beacon_data, beacons, locs)
     # print(locs)
     # print(beacons)

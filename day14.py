@@ -21,8 +21,7 @@ def solve1(dat):
         if chara not in counts.keys():
             counts[chara] = 0
         counts[chara] += 1
-    # print(counts)
-    return 3978 - 570
+    return max(counts.values()) - min(counts.values())
 
 
 def solve2(dat):
@@ -63,7 +62,7 @@ def solve2(dat):
         elements[a] += amount
         elements[b] += amount
     for key in elements.keys():
-        elements[key] = elements[key] / 2
+        elements[key] = elements[key] // 2
     maxV = max(elements.values())
     minV = min(elements.values())
     # print(elements)

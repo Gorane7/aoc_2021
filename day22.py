@@ -5,7 +5,7 @@ import random
 from main import *
 
 skip = []
-end_after = 7
+end_after = 20
 
 def parse_region(x):
     sp1 = x.split("=")[1]

@@ -86,9 +86,7 @@ def solve2(dat):
         cave_map[y][x] = "#"
     for my_fold in folds:
         cave_map = fold(cave_map, my_fold)
-    for line in cave_map:
-        pass
-        # print("".join(line))
+    return "\n" + "\n".join(["".join(line) for line in cave_map])
 
 
 def main():
