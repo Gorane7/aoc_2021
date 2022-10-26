@@ -53,7 +53,7 @@ def parse_line(line, parser):
 
 
 def save_input(day, lines):
-    file = open(f"inputs/in{day}.txt", "w")
+    file = open(f"../inputs/in{day}.txt", "w")
     file.write("\n".join(lines))
     file.close()
 
@@ -75,8 +75,8 @@ def get_input(year, day):
 
 def parse_input(day, input_format):
     lines = []
-    if os.path.exists(f"inputs/in{day}.txt"):
-        file = open(f"inputs/in{day}.txt", "r")
+    if os.path.exists(f"../inputs/in{day}.txt"):
+        file = open(f"../inputs/in{day}.txt", "r")
         lines = [x.strip("\n") for x in file.readlines()]
         file.close()
     if len(lines) == 0:

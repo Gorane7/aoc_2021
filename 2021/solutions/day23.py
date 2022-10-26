@@ -20,11 +20,16 @@ BEST_SOL = 46000
 SOLUTIONS = 0
 
 def solve1(dat):
+    global BEST_SOL
+    global SOLUTIONS
+    BEST_SOL = 46000
+    SOLUTIONS = 0
     data = dat["data"]
     hallway = [None] * 11
     up = ["D", "D", "B", "A"]
     down = ["C", "A", "B", "C"]
     cost = solve(hallway, up, down, 0, 0)
+    return cost
 
 
 def should_move_to_room(i, hallway, up, down):
@@ -282,6 +287,10 @@ def solve_for_2(hallway, caves, cost, level, moves):
 
 
 def solve2(dat):
+    global BEST_SOL
+    global SOLUTIONS
+    BEST_SOL = 46000
+    SOLUTIONS = 0
     data = dat["data"]
     hallway = [None] * 11
     up = ["D", "D", "B", "A"]
@@ -305,8 +314,9 @@ def main():
         print("Got data successfully")
     else:
         print("Error getting data")
-    # ans1 = solve1(data)
-    ans1 = "Skipping"
+    ans1 = solve1(data)
+    print(ans1)
+    # ans1 = "Skipping"
     ans2 = solve2(data)
     print(f"Answer a: {ans1}")
     print(f"Answer b: {ans2}")
