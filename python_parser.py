@@ -318,6 +318,7 @@ class Liner:
         self.lines.append(self.line)
         self.line = None
         [print(line) for line in self.lines]
+        self.lines = self.lines[::-1]
 
     def peek(self, n=1):
         if n > len(self.lines):
@@ -344,17 +345,79 @@ class LineParser:
     def __init__(self, liner):
         self.liner = liner
         self.lines = []
+        self.errors = []
         print("")
         while not self.liner.isEOF():
-            self.lines.append(self.parse_line(self.liner.consume()))
-        [print(line) for line in self.lines]
+            try_parse = self.parse_full_line(self.liner.consume())
+            if try_parse[0]:
+                self.lines.append(try_parse[1])
+            else:
+                self.errors.append(try_parse)
+        [print(x) for x in self.lines]
+        [print(x) for x in self.errors]
+        # [print(line) for line in self.lines]
+
+    # GRAMMAR RULES
+    # basic <variable> {variable}
+    # basic <tab>      {tab}
+
+    # import_variable <base>     {variable}
+    # import_variable <next_dot> {variable}.{import_variable}
+
+    # function_variables <null>          _
+    # function_variables <base>          {variable}
+    # function_variables <next_variable> {variable}, {function_variables}
+
+    # computation <variable> {variable}
+    # computation <string> {string_literal}
+    # computation <number> {number_literal}
+    # computation <call> {computation}({comma_computations})
+    # computation <dot_access> {computation}.{variable}
+    # computation <index_access> {computation}[{computation}]
+
+    # assign_to <base>         {variable}
+    # assign_to <dot_access>   {assign_to}.{variable}
+    # assign_to <index_access> {assign_to}[{computation}]
+
+    # comma_assign_to <base>           {assign_to}
+    # comma_assign_to <next_assign_to> {assign_to}, {comma_assign_to}
+
+    # comma_computations <base> {computation}
+    # comma_computations <next_computation> {computation}, {comma_computations}
+
+    # line <import>       import {import_variable}
+    # line <base_import>  from {import_variable} import {import_variable}
+    # line <function_def> def {variable}({function_variables}):
+    # line <assigment>    {comma_assign_to} = {comma_computations} # enforce some additional checks here
+
+    # full_line <base> {tab} {line}
+
+    def parse_import_variable(self, import_variable):
+        if import_variable[0][0] == "variable":
+            return True, ["variable", import_variable[0][1]]
+        return False, import_variable
+
+    def parse_function_variables(self, function_variables):
+        return True, function_variables
 
     def parse_line(self, line):
-        i = 0
-        new_line = []
-        while i < len(line):
-            i += 1
-        return new_line
+        if line[0] == ["keyword", "import"]:
+            try_parse = self.parse_import_variable(line[1:])
+            if try_parse[0]:
+                return True, ["import", try_parse[1]]
+        if line[0] == ["keyword", "def"] and line[1][0] == "variable" and line[2] == ["symbol", "("] and line[-1] == ["symbol", ":"] and line[-2] == ["symbol", ")"]:
+            try_parse = self.parse_function_variables(line[3:-2])
+            if try_parse[0]:
+                return True, ["def", line[1][1], try_parse[1]]
+        return False, line
+
+
+    def parse_full_line(self, full_line):
+        if full_line[0][0] == "tab":
+            try_parse = self.parse_line(full_line[1:])
+            if try_parse[0]:
+                return True, [full_line[0][1], try_parse[1]]
+        return False, full_line
 
 
 if __name__ == '__main__':
