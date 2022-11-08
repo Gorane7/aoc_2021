@@ -361,13 +361,6 @@ class LineParser:
     # basic <variable> {variable}
     # basic <tab>      {tab}
 
-    # import_variable <base>     {variable}
-    # import_variable <next_dot> {variable}.{import_variable}
-
-    # function_variables <null>          _
-    # function_variables <base>          {variable}
-    # function_variables <next_variable> {variable}, {function_variables}
-
     # computation <variable> {variable}
     # computation <string> {string_literal}
     # computation <number> {number_literal}
@@ -375,43 +368,114 @@ class LineParser:
     # computation <dot_access> {computation}.{variable}
     # computation <index_access> {computation}[{computation}]
 
-    # assign_to <base>         {variable}
-    # assign_to <dot_access>   {assign_to}.{variable}
-    # assign_to <index_access> {assign_to}[{computation}]
-
-    # comma_assign_to <base>           {assign_to}
-    # comma_assign_to <next_assign_to> {assign_to}, {comma_assign_to}
-
     # comma_computations <base> {computation}
     # comma_computations <next_computation> {computation}, {comma_computations}
 
-    # line <import>       import {import_variable}
-    # line <base_import>  from {import_variable} import {import_variable}
-    # line <function_def> def {variable}({function_variables}):
-    # line <assigment>    {comma_assign_to} = {comma_computations} # enforce some additional checks here
+    def separate_by_commas(self, variables):
+        result = []
+        nest_round = 0
+        nest_square = 0
+        nest_curly = 0
+        current = []
+        for variable in variables:
+            if variable == ["symbol", "("]:
+                nest_round += 1
+            elif variable == ["symbol", ")"]:
+                nest_round -= 1
+            elif variable == ["symbol", "["]:
+                nest_square += 1
+            elif variable == ["symbol", "]"]:
+                nest_square -= 1
+            elif variable == ["symbol", "{"]:
+                nest_curly += 1
+            elif variable == ["symbol", "}"]:
+                nest_curly -= 1
 
-    # full_line <base> {tab} {line}
+            if variable == ["symbol", ","] and nest_round == nest_square == nest_curly == 0:
+                result.append(current)
+                current = []
+            else:
+                current.append(variable)
+        if current:
+            result.append(current)
+        return result
 
+    # import_variable <base>     {variable}
+    # import_variable <next_dot> {variable}.{import_variable}
     def parse_import_variable(self, import_variable):
-        if import_variable[0][0] == "variable":
-            return True, ["variable", import_variable[0][1]]
-        return False, import_variable
+        if len(import_variable) % 2 == 0:
+            return False, import_variable
+        for i, variable in enumerate(import_variable):
+            if i % 2:
+                if variable != ["symbol", "."]:
+                    return False, import_variable
+            else:
+                if variable[0] != "variable":
+                    return False, import_variable
+        return True, [x[1] for x in import_variable[::2]]
 
+    # comma_import_variable <base>          {import_variable}
+    # comma_import_variable <next_variable> {import_variable}, {comma_import_variable}
+    def parse_comma_import_variable(self, comma_import_variable):
+        separated = self.separate_by_commas(comma_import_variable)
+        result = []
+        for var in separated:
+            try_parse = self.parse_import_variable(var)
+            if not try_parse[0]:
+                return False, comma_import_variable
+            result.append(try_parse[1])
+        return True, result
+
+    # function_variables <null>          _
+    # function_variables <base>          {variable}
+    # function_variables <next_variable> {variable}, {function_variables}
     def parse_function_variables(self, function_variables):
         return True, function_variables
 
+    # assign_to <base>         {variable}
+    # assign_to <dot_access>   {assign_to}.{variable}
+    # assign_to <index_access> {assign_to}[{computation}]
+    def parse_assign_to(self, assign_to):
+        return True, assign_to
+
+    # comma_assign_to <base>           {assign_to}
+    # comma_assign_to <next_assign_to> {assign_to}, {comma_assign_to}
+    def parse_comma_assign_to(self, comma_assign_to):
+        separated = self.separate_by_commas(comma_assign_to)
+        result = []
+        for var in separated:
+            try_parse = self.parse_assign_to(var)
+            if not try_parse[0]:
+                return False, comma_assign_to
+            result.append(try_parse[1])
+        return True, result
+
+    def parse_comma_computations(self, comma_computations):
+        return True, comma_computations
+
+    # line <import>       import {comma_import_variable}
+    # line <base_import>  from {import_variable} import {comma_import_variable}
+    # line <function_def> def {variable}({function_variables}):
+    # line <assigment>    {comma_assign_to} = {comma_computations} # enforce some additional checks here
     def parse_line(self, line):
         if line[0] == ["keyword", "import"]:
-            try_parse = self.parse_import_variable(line[1:])
+            try_parse = self.parse_comma_import_variable(line[1:])
             if try_parse[0]:
                 return True, ["import", try_parse[1]]
         if line[0] == ["keyword", "def"] and line[1][0] == "variable" and line[2] == ["symbol", "("] and line[-1] == ["symbol", ":"] and line[-2] == ["symbol", ")"]:
             try_parse = self.parse_function_variables(line[3:-2])
             if try_parse[0]:
                 return True, ["def", line[1][1], try_parse[1]]
+        if ["symbol", "="] in line:
+            i = line.index(["symbol", "="])
+            try_parse_comma_assign_to = self.parse_comma_assign_to(line[:i])
+            try_parse_comma_computations = self.parse_comma_computations(line[i + 1:])
+            if try_parse_comma_assign_to[0] and try_parse_comma_computations[0]:
+                return True, ["assign", try_parse_comma_assign_to[1], try_parse_comma_computations[1]]
         return False, line
 
 
+    # full_line <base> {tab} {line}
     def parse_full_line(self, full_line):
         if full_line[0][0] == "tab":
             try_parse = self.parse_line(full_line[1:])
