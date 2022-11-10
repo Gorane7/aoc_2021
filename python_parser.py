@@ -367,9 +367,9 @@ class LineParser:
     # computation <call> {computation}({comma_computations})
     # computation <dot_access> {computation}.{variable}
     # computation <index_access> {computation}[{computation}]
+    def parse_computation(self, variables):
+        return True, variables
 
-    # comma_computations <base> {computation}
-    # comma_computations <next_computation> {computation}, {comma_computations}
 
     def separate_by_commas(self, variables):
         result = []
@@ -436,7 +436,44 @@ class LineParser:
     # assign_to <dot_access>   {assign_to}.{variable}
     # assign_to <index_access> {assign_to}[{computation}]
     def parse_assign_to(self, assign_to):
-        return True, assign_to
+        if len(assign_to) == 1:
+            if assign_to[0][0] == "variable":
+                return [assign_to[0][1]]
+        if len(assign_to) > 1 and assign_to[-1] == ["symbol", "]"]:
+            pot_assign_to = []
+            pot_computation = []
+            depth = 0
+            out = False
+            for part in assign_to[::-1]:
+                if out:
+                    pot_assign_to.append(part)
+                    continue
+                if part == ["symbol", "["]:
+                    depth -= 1
+                    if depth > 0:
+                        pot_computation.append(part)
+                    else:
+                        out = True
+                    continue
+                if part == ["symbol", "]"]:
+                    if depth > 0:
+                        pot_computation.append(part)
+                    depth += 1
+                    continue
+                pot_computation.append(part)
+            pot_assign_to = pot_assign_to[::-1]
+            pot_computation = pot_computation[::-1]
+            assign_to_works, assign_to_start = parse_assign_to(pot_assign_to)
+            computation_works, computation = parse_computation(pot_computation)
+            if assign_to_works and computation_works:
+                assign_to_start.append(computation)
+                return True, assign_to_start
+        if len(assign_to) > 2 and assign_to[-1][0] == "variable" and assign_to[-2] == ["symbol", "."]:
+            assign_to_works, assign_to_start = parse_assign_to(assign_to[:-2])
+            if assign_to_works:
+                assign_to_start.append(assign_to[-1][1])
+                return assign_to_start
+        return False, assign_to
 
     # comma_assign_to <base>           {assign_to}
     # comma_assign_to <next_assign_to> {assign_to}, {comma_assign_to}
@@ -450,6 +487,8 @@ class LineParser:
             result.append(try_parse[1])
         return True, result
 
+    # comma_computations <base> {computation}
+    # comma_computations <next_computation> {computation}, {comma_computations}
     def parse_comma_computations(self, comma_computations):
         return True, comma_computations
 
@@ -477,6 +516,7 @@ class LineParser:
 
     # full_line <base> {tab} {line}
     def parse_full_line(self, full_line):
+        print(full_line)
         if full_line[0][0] == "tab":
             try_parse = self.parse_line(full_line[1:])
             if try_parse[0]:
