@@ -341,6 +341,45 @@ class Liner:
     def isEOF(self):
         return len(self.lines) == 0
 
+
+class LinePrinter:
+    def __init__(self, line):
+        self.depth = line[0]
+        print(line[0])
+        if line[1][0] == "import":
+            self.print_raw(self.depth, "import")
+            for el in line[1][1]:
+                self.print_import_variable(self.depth + 1, el)
+        elif line[1][0] == "def":
+            self.print_raw(self.depth, line[1][0] + " " + line[1][1])
+            for el in line[1][2]:
+                self.print_raw(depth + 1, el)
+        elif line[1][0] == "assign":
+            for el in line[1][1]:
+                self.print_raw(self.depth, "assign")
+                self.print_assign_to(self.depth + 1, el[0])
+                self.print_computation(self.depth + 1, el[1])
+        elif line[1][0] == "for":
+            self.print_raw(self.depth, "for")
+            self.print_raw(self.depth + 1, "assign to")
+            for el in line[1][1]:
+                self.print_raw(self.depth + 2, el)
+            self.print_raw(self.depth + 1, "assign from")
+            self.print_computation(self.depth + 2, line[1][2])
+
+    def print_raw(self, depth, raw):
+        print(f"{'--' * depth}{raw}")
+
+    def print_import_variable(self, depth, data):
+        self.print_raw(depth, ".".join(data))
+
+    def print_assign_to(self, depth, data):
+        self.print_raw(depth, str(data))
+
+    def print_computation(self, depth, data):
+        self.print_raw(depth, str(data))
+
+
 class LineParser:
     def __init__(self, liner):
         self.liner = liner
@@ -353,7 +392,13 @@ class LineParser:
                 self.lines.append(try_parse[1])
             else:
                 self.errors.append(try_parse)
-        [print(x) for x in self.lines]
+        for line in self.lines:
+            if line[0] is False:
+                print(line)
+                continue
+            LinePrinter(line)
+            print(line)
+            print()
         [print(x) for x in self.errors]
         # [print(line) for line in self.lines]
 
@@ -361,15 +406,49 @@ class LineParser:
     # basic <variable> {variable}
     # basic <tab>      {tab}
 
-    # computation <variable> {variable}
-    # computation <string> {string_literal}
-    # computation <number> {number_literal}
-    # computation <call> {computation}({comma_computations})
-    # computation <dot_access> {computation}.{variable}
+    # computation <variable>     {variable}
+    # computation <string>       {string_literal}
+    # computation <number>       {number_literal}
+    # computation <call>         {computation}({comma_computations})
+    # computation <dot_access>   {computation}.{variable}
     # computation <index_access> {computation}[{computation}]
+    # computation <in_check>     {computation} in {computation}
     def parse_computation(self, variables):
-        return True, variables
+        if len(variables) == 1:
+            if variables[0][0] == "variable":
+                return True, variables[0]
+            if variables[0][0] == "string":
+                return True, variables[0]
+            if variables[0][0] == "number":
+                return True, variables[0]
+            return False, variables
+        if len(variables) >= 3 and variables[-1] == ["symbol", ")"]:
+            computation_part, comma_computations_part, success = self.separate_symbol_end(variables, "(", ")")
+            if success:
+                try_parse_computation = self.parse_computation(computation_part)
+                try_parse_comma_computations = self.parse_comma_computations(comma_computations_part)
+                if try_parse_computation[0] and try_parse_comma_computations[0]:
+                    return True, ["call", try_parse_computation[1], try_parse_comma_computations[1]]
+        return False, variables
 
+    def separate_symbol_end(self, data, start_symbol, end_symbol):
+        start_part = []
+        end_part = []
+        in_end_part = True
+        depth = 1
+        for i in range(len(data) - 2, -1, -1):
+            if in_end_part:
+                if data[i] == ["symbol", start_symbol]:
+                    depth -= 1
+                elif data[i] == ["symbol", end_symbol]:
+                    depth += 1
+                if depth == 0:
+                    in_end_part = False
+                    continue
+                end_part.append(data[i])
+            else:
+                start_part.append(data[i])
+        return start_part[::-1], end_part[::-1], not in_end_part
 
     def separate_by_commas(self, variables):
         result = []
@@ -438,7 +517,7 @@ class LineParser:
     def parse_assign_to(self, assign_to):
         if len(assign_to) == 1:
             if assign_to[0][0] == "variable":
-                return [assign_to[0][1]]
+                return True, [assign_to[0][1]]
         if len(assign_to) > 1 and assign_to[-1] == ["symbol", "]"]:
             pot_assign_to = []
             pot_computation = []
@@ -487,15 +566,35 @@ class LineParser:
             result.append(try_parse[1])
         return True, result
 
+    # comma_variable <base>          {variable}
+    # comma_variable <next_variable> {variable}, {comma_variable}
+    def parse_comma_variable(self, comma_variable):
+        if len(comma_variable) == 1 and comma_variable[0][0] == "variable":
+            return True, [comma_variable[0][1]]
+        if len(comma_variable) >= 3 and comma_variable[0][0] == "variable" and comma_variable[1] == ["symbol", ","]:
+            try_parse_rest = parse_comma_variable(comma_variable[2:])
+            if try_parse_rest[0]:
+                return True, [comma_variable[0][1]] + try_parse_rest[1]
+        return False, comma_variable
+
     # comma_computations <base> {computation}
     # comma_computations <next_computation> {computation}, {comma_computations}
     def parse_comma_computations(self, comma_computations):
-        return True, comma_computations
+        separated = self.separate_by_commas(comma_computations)
+        parsed = []
+        for el in separated:
+            try_parse = self.parse_computation(el)
+            if not try_parse[0]:
+                return False, comma_computations
+            parsed.append(try_parse[1])
+        return True, parsed
 
     # line <import>       import {comma_import_variable}
     # line <base_import>  from {import_variable} import {comma_import_variable}
     # line <function_def> def {variable}({function_variables}):
     # line <assigment>    {comma_assign_to} = {comma_computations} # enforce some additional checks here
+    # line <for>          for {comma_variable} in {computation}:
+    # line <if>           if {computation}:
     def parse_line(self, line):
         if line[0] == ["keyword", "import"]:
             try_parse = self.parse_comma_import_variable(line[1:])
@@ -510,13 +609,35 @@ class LineParser:
             try_parse_comma_assign_to = self.parse_comma_assign_to(line[:i])
             try_parse_comma_computations = self.parse_comma_computations(line[i + 1:])
             if try_parse_comma_assign_to[0] and try_parse_comma_computations[0]:
-                return True, ["assign", try_parse_comma_assign_to[1], try_parse_comma_computations[1]]
+                if len(try_parse_comma_assign_to[1]) != len(try_parse_comma_computations[1]):
+                    print("Currently not supporting assignment between elements with different length values")
+                    return False, line
+                return True, ["assign", [[x, y] for x, y in zip(try_parse_comma_assign_to[1], try_parse_comma_computations[1])]]
+        if line[0] == ["keyword", "for"] and line[-1] == ["symbol", ":"]:
+            comma_variable_part = []
+            computation_part = []
+            in_next = False
+            for symbol in line[1:-1]:
+                if in_next:
+                    computation_part.append(symbol)
+                    continue
+                if symbol == ["keyword", "in"]:
+                    in_next = True
+                    continue
+                comma_variable_part.append(symbol)
+            try_parse_comma_variable = self.parse_comma_variable(comma_variable_part)
+            try_parse_computation = self.parse_computation(computation_part)
+            if try_parse_comma_variable[0] and try_parse_computation[0]:
+                return True, ["for", try_parse_comma_variable[1], try_parse_computation[1]]
+        if line[0] == ["keyword", "if"] and line[-1] == ["symbol", ":"]:
+            try_parse_computation = self.parse_computation(line[1:-1])
+            if try_parse_computation[0]:
+                return True, ["if", try_parse_computation[1]]
         return False, line
 
 
     # full_line <base> {tab} {line}
     def parse_full_line(self, full_line):
-        print(full_line)
         if full_line[0][0] == "tab":
             try_parse = self.parse_line(full_line[1:])
             if try_parse[0]:
