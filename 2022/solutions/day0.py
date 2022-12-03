@@ -1,5 +1,11 @@
 from main import *
+import random, math
+# import matplotlib.pyplot as plt
 import shelve
+
+LETTERS = "abcdefghijklmnopqrstuvwxyz"
+UPPER_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+NUMBERS = "0123456789"
 
 
 def solve1(data):
@@ -17,7 +23,7 @@ def solve1(data):
     my_shelf.close()
 
 
-def solve2(dat):
+def solve2(data):
     my_shelf = shelve.open("shelf.tmp")
     for key in my_shelf:
         globals()[key] = my_shelf[key]
