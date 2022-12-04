@@ -26,7 +26,16 @@ def solve1(data):
     l = []
     ans = 0
     for line in data:
-        pass
+        a, b = line.split(",")
+        a0, a1 = a.split("-")
+        b0, b1 = b.split("-")
+        a0, a1, b0, b1 = int(a0), int(a1), int(b0), int(b1)
+        a = [i for i in range(a0, a1 + 1)]
+        b = [i for i in range(b0, b1 + 1)]
+        comb = set(a).intersection(b)
+        if len(comb) > 0:
+            ans += 1
+        # ans += a1 >= b1 and a0 <= b0 or b1 >= a1 and b0 <= a0
 
     # END SOLUTION
 
@@ -47,10 +56,18 @@ def solve2(data):
     my_shelf.close()
 
     # SOLUTION HERE
+    ans = 0
+    for line in data:
+        a, b = line.split(",")
+        a0, a1 = a.split("-")
+        b0, b1 = b.split("-")
+        a0, a1, b0, b1 = int(a0), int(a1), int(b0), int(b1)
+        ans += a1 >= b1 and a0 <= b0 or b1 >= a1 and b0 <= a0
+    return ans
 
 
 def main():
-    day = 0
+    day = 4
     data = parse_input(day)
     if data:
         print("Got data successfully")

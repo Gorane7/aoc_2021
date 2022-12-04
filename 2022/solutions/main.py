@@ -5,6 +5,15 @@ import os
 YEAR = 2022
 
 
+def smart_map_lines(lines, delim=" "):
+    new_lines = []
+    for line in lines:
+        splitted = line.split(delim)
+        for i in range(len(splitted)):
+            pass
+    return new_lines
+
+
 def map_lines(lines, functions, delim=" "):
     new_lines = []
     for a, line in enumerate(lines):
@@ -83,9 +92,9 @@ def get_input(year, day):
     url = f"https://adventofcode.com/{year}/day/{day}/input"
     cookies = {
         "_gat": "1",
-        "_ga": "GA1.2.1668813612.1666544999",
-        "session": "53616c7465645f5fff1738b41a2cf505ad51e2834adf62d5668670228021b7efc1ed1bdc20474202dc3178ca00223ce1356e368946e5665d0a4c93a834e6074e",
-        "_gid": "GA1.2.743798007.1666544999"
+        "_ga": "GA1.2.47538840.1659169507",
+        "session": "53616c7465645f5f56e50a04e0e6a8f683845e43a9162d67a82b09ac8a8aa5400ff9401d28c4251615f1ddbeb717f64fce2a232ca79b12fe71016a6eb1b2724b",
+        "_gid": "GA1.2.958522239.1670129049"
     }
     headers = {
         "User-agent": "A python script by kristjankv32@gmail.com ... Will upload script to github and link soon"
