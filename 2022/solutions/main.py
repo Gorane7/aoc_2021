@@ -92,9 +92,9 @@ def get_input(year, day):
     url = f"https://adventofcode.com/{year}/day/{day}/input"
     cookies = {
         "_gat": "1",
-        "_ga": "GA1.2.47538840.1659169507",
-        "session": "53616c7465645f5f56e50a04e0e6a8f683845e43a9162d67a82b09ac8a8aa5400ff9401d28c4251615f1ddbeb717f64fce2a232ca79b12fe71016a6eb1b2724b",
-        "_gid": "GA1.2.958522239.1670129049"
+        "_ga": "GA1.2.1562215521.1670042469",
+        "session": "53616c7465645f5f35787baa858d96962581236896d1d69b6a51aee18b2a0293cafc0b03a99330ba6f9ade647cd3c4b8170b59c17d9ea15827f4a6840ebc4816",
+        "_gid": "GA1.2.842619356.1670215183"
     }
     headers = {
         "User-agent": "A python script by kristjankv32@gmail.com ... Will upload script to github and link soon"
