@@ -14,6 +14,21 @@ def smart_map_lines(lines, delim=" "):
     return new_lines
 
 
+def extract_ints(line):
+    cache = ""
+    ints = []
+    for ch in line:
+        if ch in "0123456789":
+            cache = cache + ch
+        else:
+            if cache != "":
+                ints.append(int(cache))
+                cache = ""
+    if cache != "":
+        ints.append(int(cache))
+    return ints
+
+
 def map_lines(lines, functions, delim=" "):
     new_lines = []
     for a, line in enumerate(lines):

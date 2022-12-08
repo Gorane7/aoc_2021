@@ -10,6 +10,7 @@ NUMBERS = "0123456789"
 
 def solve1(data):
 
+    ints = [extract_ints(x) for x in data]
     # first = map_lines(data[:1], [int], ",")
     parsed = map_lines(data, [str])
     # parsed = map_lines(data, [int])
@@ -26,6 +27,8 @@ def solve1(data):
     l = []
     ans = 0
     for line in data:
+        pass
+    for ini in ints:
         pass
 
     # END SOLUTION
