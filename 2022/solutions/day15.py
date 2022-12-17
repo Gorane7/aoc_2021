@@ -2,6 +2,7 @@ from main import *
 import random, math
 # import matplotlib.pyplot as plt
 import shelve
+import time
 
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPER_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -36,23 +37,7 @@ def solve1(data):
         b = (ini[2], ini[3])
         d = abs(s[0] - b[0]) + abs(s[1] - b[1])
         ini.append(d)
-        print(f"Sensor: {s}, Becaon: {b}, Dist: {d}")
-    total = 4000000 * 4000000
-    for i in range(total, -1, -1):
-        x = i // 4000000
-        y = i % 4000000
-        found = True
-        for ini in ints:
-            d = abs(x - ini[0]) + abs(y - ini[1])
-            if d <= ini[4]:
-                found = False
-                break
-        if found:
-            print(x, y)
-            break
-
-        if i % 10000000 == 0:
-            print(f"{100 - 100 * i / total}%")
+        # print(f"Sensor: {s}, Becaon: {b}, Dist: {d}")
 
     # -389916 1188862
 
@@ -65,6 +50,7 @@ def solve1(data):
         except:
             print(f"ERROR shelving {key}")
     my_shelf.close()
+    print(ans)
     return ans
 
 
@@ -75,6 +61,45 @@ def solve2(data):
     my_shelf.close()
 
     # SOLUTION HERE
+    cannot = set()
+
+    for ini in ints:
+        s = (ini[0], ini[1])
+        b = (ini[2], ini[3])
+        d = abs(s[0] - b[0]) + abs(s[1] - b[1])
+        ini.append(d)
+        # print(f"Sensor: {s}, Becaon: {b}, Dist: {d}")
+    # cur_size = 21
+    cur_size = 4000001
+    total = cur_size * cur_size
+    last_time = time.time()
+    c = 0
+    i = 0
+    while i < total:
+        c += 1
+        if c % 100000 == 0:
+            if time.time() - last_time > 1:
+                print(f"{100 * i / total}%")
+                last_time = time.time()
+        x = i % cur_size
+        y = i // cur_size
+        found = True
+        for ini in ints:
+            d = abs(x - ini[0]) + abs(y - ini[1])
+            if d <= ini[4]:
+                found = False
+                diff = abs(ini[1] - y)
+                dx = ini[4] - diff
+                new_x = ini[0] + dx
+                new_x = min(cur_size - 2, new_x)
+                # print(f"Location {x, y} has problem with sensor {ini[0], ini[1]}, ydiff is {diff}, xdiff is {dx}, can move forward {new_x}")
+                i += max(1, (new_x - x) - 3)
+                # i += 1
+                break
+        if found:
+            print(x, y)
+            break
+    return x * (cur_size - 1) + y
 
 
 def main():

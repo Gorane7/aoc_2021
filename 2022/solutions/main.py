@@ -18,7 +18,7 @@ def extract_ints(line):
     cache = ""
     ints = []
     for ch in line:
-        if ch in "0123456789":
+        if ch in "-0123456789":
             cache = cache + ch
         else:
             if cache != "":
@@ -109,7 +109,7 @@ def get_input(year, day):
         "_gat": "1",
         "_ga": "GA1.2.1562215521.1670042469",
         "session": "53616c7465645f5f35787baa858d96962581236896d1d69b6a51aee18b2a0293cafc0b03a99330ba6f9ade647cd3c4b8170b59c17d9ea15827f4a6840ebc4816",
-        "_gid": "GA1.2.842619356.1670215183"
+        "_gid": "GA1.2.73736269.1671278761"
     }
     headers = {
         "User-agent": "A python script by kristjankv32@gmail.com ... Will upload script to github and link soon"
