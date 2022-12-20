@@ -15,7 +15,7 @@ class Number:
 
 
 def find_index(listi, ind):
-    print(ind)
+    # print(ind)
     for i, val in enumerate(listi):
         if val.index == ind:
             return val, i
@@ -59,7 +59,7 @@ def solve1(data):
     counter = -1
     total = 0
     curr = 0
-    print([x.val for x in orr])
+    # print([x.val for x in orr])
     while True:
         if counter == -1:
             if orr[curr % len(orr)].val == 0:
@@ -105,14 +105,14 @@ def solve2(data):
     dekey = 811589153
     orr = [Number(x[0] * dekey, i) for i, x in enumerate(ints)]
     for i in range(10):
-        leng = 7
+        leng = 5000
         for k in range(leng):
             target, ind = find_index(orr, k)
             valu = target.val
             if valu > 0:
-                valu = valu % leng
+                valu = valu % (leng - 1)
             if valu < 0:
-                valu += leng * (abs(valu) // leng)
+                valu += (leng - 1) * (abs(valu) // (leng - 1))
             if valu > 0:
                 for j in range(ind, ind + valu):
                     if valu > 0:
@@ -126,8 +126,8 @@ def solve2(data):
     counter = -1
     total = 0
     curr = 0
-    print([x.val for x in orr])
-    print(len(orr))
+    # print([x.val for x in orr])
+    # print(len(orr))
     while True:
         if counter == -1:
             if orr[curr % len(orr)].val == 0:
@@ -154,7 +154,7 @@ def main():
     else:
         print("Error getting data")
     ans1, ans2 = None, None
-    # ans1 = solve1([x for x in data])
+    ans1 = solve1([x for x in data])
     ans2 = solve2([x for x in data])
     print(f"Answer a: {ans1}")
     print(f"Answer b: {ans2}")
