@@ -90,6 +90,7 @@ def solve2(data):
             ans += a
     for row in picture:
         print("".join(row))
+    print(values)
 
 
 def main():

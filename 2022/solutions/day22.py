@@ -27,72 +27,50 @@ def solve1(data):
     l = []
     ans = 0
     grid = {}
-    maxx = 150
-    maxy = 200
-    # maxx = 17
-    # maxy = 12
-    for y, line in enumerate(data[:201]):
+    for y, line in enumerate(data):
+        if line == "":
+            break
         for x, ch in enumerate(line):
-            grid[(y + 1, x + 1)] = ch
-        x += 1
-        while x < maxx:
-            grid[(y + 1, x + 1)] = " "
-            x += 1
+            if ch != " ":
+                grid[(x + 1, y + 1)] = ch
     instructions = data[-1]
 
     x = 51
+    # x = 9
     y = 1
     face = 0
     d = [(1, 0), (0, 1), (-1, 0), (0, -1)]
     cache = ""
-    for ch in instructions:
-        if ch in "LR":
+    for ch in instructions + "F":
+        if ch in "LRF":
             dir = ch
             amount = int(cache)
             cache = ""
             dx, dy = d[face]
             for i in range(amount):
-                new = (y + dy, x + dx)
+                new = (x + dx, y + dy)
                 if new not in grid.keys():
-                    if new[0] == 0:
-                        new = (maxy, new[1])
-                    elif new[1] == 0:
-                        new = (new[0], maxx)
-                    elif new[0] > maxy:
-                        new = (1, new[1])
-                    elif new[1] > maxx:
-                        new = (new[0], 1)
+                    if face == 0:
+                        new = (min([a[0] for a in grid if a[1] == new[1]]), new[1])
+                    elif face == 1:
+                        new = (new[0], min([a[1] for a in grid if a[0] == new[0]]))
+                    elif face == 2:
+                        new = (max([a[0] for a in grid if a[1] == new[1]]), new[1])
                     else:
-                        print("ERROR")
-                while grid[new] == " ":
-                    new = (new[0] + dy, new[1] + dx)
-                    if new not in grid.keys():
-                        if new[0] == 0:
-                            new = (maxy, new[1])
-                        elif new[1] == 0:
-                            new = (new[0], maxx)
-                        elif new[0] > maxy:
-                            new = (1, new[1])
-                        elif new[1] > maxx:
-                            new = (new[0], 1)
-                        else:
-                            print("ERROR")
+                        new = (new[0], max([a[1] for a in grid if a[0] == new[0]]))
                 if grid[new] == "#":
                     break
-                y, x = new
+                x, y = new
             if ch == "L":
                 face = (face - 1) % 4
             elif ch == "R":
                 face = (face + 1) % 4
-            else:
-                print("ERROR")
-            print(x, y, face)
             continue
         cache += ch
     print(x, y, face)
 
     # END SOLUTION
-    return ans
+    return 1000 * y + 4 * x + face
 
 
 def solve2(data):
@@ -102,6 +80,64 @@ def solve2(data):
     my_shelf.close()
 
     # SOLUTION HERE
+    grid = {}
+    for y, line in enumerate(data):
+        if line == "":
+            break
+        for x, ch in enumerate(line):
+            if ch != " ":
+                grid[(x + 1, y + 1)] = ch
+    instructions = data[-1]
+
+    side_length = 50
+    x = side_length + 1
+    # x = 9
+    y = 1
+    face = 0
+    d = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+    cache = ""
+    for ch in instructions + "F":
+        if ch in "LRF":
+            dir = ch
+            amount = int(cache)
+            cache = ""
+            dx, dy = d[face]
+            for i in range(amount):
+                new = (x + dx, y + dy)
+                if new not in grid.keys():
+                    #   .##
+                    #   .#.
+                    #   ##.
+                    #   #..
+                    if face == 0:
+                        if y <= side_length:
+                            pass
+                        elif y <= side_length * 2:
+                            pass
+                        elif y <= side_length * 3:
+                            pass
+                        else:
+                            pass
+                        new = (min([a[0] for a in grid if a[1] == new[1]]), new[1])
+                    elif face == 1:
+                        new = (new[0], min([a[1] for a in grid if a[0] == new[0]]))
+                    elif face == 2:
+                        new = (max([a[0] for a in grid if a[1] == new[1]]), new[1])
+                    else:
+                        new = (new[0], max([a[1] for a in grid if a[0] == new[0]]))
+                if grid[new] == "#":
+                    break
+                x, y = new
+            if ch == "L":
+                face = (face - 1) % 4
+            elif ch == "R":
+                face = (face + 1) % 4
+            continue
+        cache += ch
+    print(x, y, face)
+
+    # END SOLUTION
+    return 1000 * y + 4 * x + face
 
 
 def main():

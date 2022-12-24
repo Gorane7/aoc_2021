@@ -17,14 +17,14 @@ def find(oror, clor, obor, obcl, geor, geob, minutes, robots, resources, best_ma
         return resources[3]
     best = 0
     limi = 2
-    key = (resources[0], resources[1], resources[2], resources[3], robots[0], robots[1], robots[2], robots[3])
-    if key in best_map.keys() and best_map[key][0] >= minutes:
+    key = (resources[0], resources[1], resources[2], minutes, robots[0], robots[1], robots[2])
+    if key in best_map.keys() and best_map[key] >= resources[3]:
         best_map["o"] += 1
         best_map["d"] += 100 / 5 ** (depth - minutes)
         # print(f"Skipping at {minutes} minutes left and added {100 / (depth - minutes) ** 5}%")
         if best_map["o"] % 100000 == 0:
             print(f"Optimized {best_map['o']} times, with {len(best_map.keys())} keys and {best_map['d']}% done")
-        return best_map[key][1]
+        return best_map[key]
 
     """
     obr_y = robots[2]
@@ -57,53 +57,53 @@ def find(oror, clor, obor, obcl, geor, geob, minutes, robots, resources, best_ma
 
     if robots[0] < max(clor, obor, geor):
         if resources[0] >= geor and resources[2] >= geob and minutes > 1:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2], robots[3] + 1), (resources[0] + robots[0] - geor, resources[1] + robots[1], resources[2] + robots[2] - geob, resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2]), (resources[0] + robots[0] - geor, resources[1] + robots[1], resources[2] + robots[2] - geob, resources[3] + minutes - 1), best_map, key_stack)
             best = max(best, test)
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
 
         if resources[0] >= obor and resources[1] >= obcl and minutes > 2 and should_build_obs:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2] + 1, robots[3]), (resources[0] + robots[0] - obor, resources[1] + robots[1] - obcl, resources[2] + robots[2], resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2] + 1), (resources[0] + robots[0] - obor, resources[1] + robots[1] - obcl, resources[2] + robots[2], resources[3]), best_map, key_stack)
             best = max(best, test)
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
 
         if resources[0] >= clor and minutes > 3:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1] + 1, robots[2], robots[3]), (resources[0] + robots[0] - clor, resources[1] + robots[1], resources[2] + robots[2], resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1] + 1, robots[2]), (resources[0] + robots[0] - clor, resources[1] + robots[1], resources[2] + robots[2], resources[3]), best_map, key_stack)
             best = max(best, test)
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
 
         if resources[0] >= oror and minutes > 2:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0] + 1, robots[1], robots[2], robots[3]), (resources[0] + robots[0] - oror, resources[1] + robots[1], resources[2] + robots[2], resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0] + 1, robots[1], robots[2]), (resources[0] + robots[0] - oror, resources[1] + robots[1], resources[2] + robots[2], resources[3]), best_map, key_stack)
             best = max(best, test)
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
 
-        test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2], robots[3]), (resources[0] + robots[0], resources[1] + robots[1], resources[2] + robots[2], resources[3] + robots[3]), best_map, key_stack)
+        test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2]), (resources[0] + robots[0], resources[1] + robots[1], resources[2] + robots[2], resources[3]), best_map, key_stack)
         best = max(best, test)
     else:
         did_robot = False
         if resources[0] >= geor and resources[2] >= geob and minutes > 1:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2], robots[3] + 1), (resources[0] + robots[0] - geor, resources[1] + robots[1], resources[2] + robots[2] - geob, resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2]), (resources[0] + robots[0] - geor, resources[1] + robots[1], resources[2] + robots[2] - geob, resources[3] + minutes - 1), best_map, key_stack)
             best = max(best, test)
             did_robot = True
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
         if resources[0] >= obor and resources[1] >= obcl and minutes > 2 and should_build_obs:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2] + 1, robots[3]), (resources[0] + robots[0] - obor, resources[1] + robots[1] - obcl, resources[2] + robots[2], resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2] + 1), (resources[0] + robots[0] - obor, resources[1] + robots[1] - obcl, resources[2] + robots[2], resources[3]), best_map, key_stack)
             best = max(best, test)
             did_robot = True
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
         if resources[0] >= clor and minutes > 3:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1] + 1, robots[2], robots[3]), (resources[0] + robots[0] - clor, resources[1] + robots[1], resources[2] + robots[2], resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1] + 1, robots[2]), (resources[0] + robots[0] - clor, resources[1] + robots[1], resources[2] + robots[2], resources[3]), best_map, key_stack)
             best = max(best, test)
             did_robot = True
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
         if not did_robot:
-            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2], robots[3]), (resources[0] + robots[0], resources[1] + robots[1], resources[2] + robots[2], resources[3] + robots[3]), best_map, key_stack)
+            test = find(oror, clor, obor, obcl, geor, geob, minutes - 1, (robots[0], robots[1], robots[2]), (resources[0] + robots[0], resources[1] + robots[1], resources[2] + robots[2], resources[3]), best_map, key_stack)
             best = max(best, test)
             best_map["d"] -= 100 / 5 ** (depth - minutes + 1)
         best_map["d"] += 100 / 5 ** (depth - minutes + 1)
@@ -117,7 +117,7 @@ def find(oror, clor, obor, obcl, geor, geob, minutes, robots, resources, best_ma
                 key_stack[to_rem] = key_stack[-1]
                 key_stack.pop()
             key_stack.append(key)
-        best_map[key] = (minutes, best)
+        best_map[key] = best
     return best
 
 
@@ -153,7 +153,8 @@ def solve1(data):
         geode_obsidian = ini[6]
         best_map = {"o": 0, "d": 0.0}
         key_stack = []
-        temp = find(ore_ore, clay_ore, obsidian_ore, obsidian_clay, geode_ore, geode_obsidian, depth, (1, 0, 0, 0), (0, 0, 0, 0), best_map, key_stack)
+        data_arr = [depth, 1, 0, 0, 0, 0, 0, 0]  # depth, (ro1, ro2, ro3), (re1, re2, re3, re4)
+        temp = find(ore_ore, clay_ore, obsidian_ore, obsidian_clay, geode_ore, geode_obsidian, data_arr, best_map, key_stack)
         ans += temp * ini[0]
         print(f"{ini[0]} done, answer was {temp}")
         # break
@@ -189,7 +190,7 @@ def solve2(data):
         geode_obsidian = ini[6]
         best_map = {"o": 0, "d": 0.0}
         key_stack = []
-        temp = find(ore_ore, clay_ore, obsidian_ore, obsidian_clay, geode_ore, geode_obsidian, depth, (1, 0, 0, 0), (0, 0, 0, 0), best_map, key_stack)
+        temp = find(ore_ore, clay_ore, obsidian_ore, obsidian_clay, geode_ore, geode_obsidian, depth, (1, 0, 0), (0, 0, 0, 0), best_map, key_stack)
         ans *= temp
         print(f"{ini[0]} done, answer was {temp}")
     return ans
